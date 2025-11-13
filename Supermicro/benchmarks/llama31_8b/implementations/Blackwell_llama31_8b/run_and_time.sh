@@ -15,7 +15,7 @@
 # limitations under the License.
 
 # runs benchmark and reports time to convergence
-set -e
+set +e
 
 ###########################################################################
 # This script is invoked inside the container, and a copy is launched on every
@@ -42,17 +42,17 @@ set -e
 ###########################################################################
 
 # vars that should be set by the launcher (Pytorch)
-: "${RANK:?RANK not set}"
-: "${LOCAL_RANK:?LOCAL_RANK not set}"
-: "${WORLD_SIZE:?WORLD_SIZE not set}"
-: "${LOCAL_WORLD_SIZE:?LOCAL_WORLD_SIZE not set}"
-: "${MASTER_ADDR:?MASTER_ADDR not set}"
-: "${MASTER_PORT:?MASTER_PORT not set}"
+: "${RANK:=0}" # interactive run, assume this script is run on rank 0
+# : "${LOCAL_RANK:?LOCAL_RANK not set}"
+# : "${WORLD_SIZE:?WORLD_SIZE not set}"
+: "${LOCAL_WORLD_SIZE:=0}" # workaround to make sure we use torchrun below
+: "${MASTER_ADDR:=localhost}"
+: "${MASTER_PORT:=29500}"
 
 [ "${DEBUG}" = "0" ] && set -x
 
 # Vars without defaults
-: "${SEED:?SEED not set}"
+: "${SEED:=1112}"
 : "${WALLTIME:=?WALLTIME not set}"
 
 # Vars with defaults
@@ -87,9 +87,10 @@ echo "LOAD_CHECKPOINT=${LOAD_CHECKPOINT}"
 
 [[ "${DEBUG}" ]] && echo RANK="${RANK}", LOCAL_RANK="${LOCAL_RANK}", MASTER_ADDR="${MASTER_ADDR}", MASTER_PORT="${MASTER_PORT}", WORLD_SIZE="${WORLD_SIZE}", UCX_NET_DEVICES="${UCX_NET_DEVICES}", NCCL_SOCKET_IFNAME="${NCCL_SOCKET_IFNAME}", NCCL_IB_HCA="${NCCL_IB_HCA}", NCCL_IGNORE_CPU_AFFINITY="${NCCL_IGNORE_CPU_AFFINITY}", NCCL_IB_PCI_RELAXED_ORDERING="${NCCL_IB_PCI_RELAXED_ORDERING}", SHARP_COLL_ENABLE_PCI_RELAXED_ORDERING="${SHARP_COLL_ENABLE_PCI_RELAXED_ORDERING}", UCX_VFS_ENABLE="${UCX_VFS_ENABLE}"
 
-if [[ "$RANK" -eq 0 ]]; then
-    env > /results/container-env-"$SLURM_JOB_ID".log
-fi
+# Comment out - non-slurm
+# if [[ "$RANK" -eq 0 ]]; then
+#     env > /results/container-env-"$SLURM_JOB_ID".log
+# fi
 
 if [ "${NEMO_RESULTS_IN_TMP:-0}" -eq 1 ]; then
   readonly _explicit_log_dir=/tmp/${NEMO_RESULTS_SUBDIR:-""}
@@ -178,10 +179,12 @@ fi
 
 [[ "$RANK" -eq 0 ]] && echo "Extra args: $EXTRA_ARGS"
 
+BINDCMD="" #hardcode no bindpcie for now
 CUDA_COREDUMP_FILE=/results/llama31.%h.%p ${LOGGER:-} ${BINDCMD:-} ${CMD[@]} /workspace/llm/pretrain.py \
-	$EXTRA_ARGS \
+	$EXTRA_ARGS model.tokenizer.model=./aux/Llama-3.1-8B \
 	; ret_code=$?
 
 set +x
 sleep 3
-if [[ $ret_code != 0 ]]; then exit $ret_code; fi
+# dont exit, there is useful info 
+# if [[ $ret_code != 0 ]]; then exit $ret_code; fi

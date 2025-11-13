@@ -137,7 +137,7 @@ def get_data(config):
 
     tokenizer = AutoTokenizer(pretrained_model_name=tokenizer_path)
 
-    val_test_path = "/preproc_data/c4-validation-91205-samples.en_text_document"
+    val_test_path = f"{tokenizer_path}/../c4-validation-91205-samples.en_text_document"
 
     if config.model.base_config == "8b":
         r = [6]
@@ -145,7 +145,7 @@ def get_data(config):
         r = [6, 7]
     train_datasets = sum(
         [
-            ["50", f"/preproc_data/c4-train.en_{idx}_text_document"]
+            ["50", f"{tokenizer_path}/../c4-train.en_{idx}_text_document"]
             for idx in r
         ],
         [],

@@ -1,0 +1,1 @@
+config_DGXB200_1x8x2xtp1pp1cp1_8b_fp4.sh

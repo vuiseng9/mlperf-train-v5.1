@@ -1,0 +1,15 @@
+# Start from existing image that already has everything built
+FROM rocm/amd-mlperf:llama31_8b_training_5.1
+
+SHELL ["/bin/bash", "-lc"]
+
+ENV VIRTUAL_ENV=/opt/venv
+ENV PATH="$VIRTUAL_ENV/bin:${PATH}"
+
+# --- Replace /workspace/code with the current directory contents ---
+WORKDIR /workspace
+RUN mv /workspace/code /workspace/old.code
+RUN mkdir -p /workspace/code
+
+WORKDIR /workspace/code
+COPY . .

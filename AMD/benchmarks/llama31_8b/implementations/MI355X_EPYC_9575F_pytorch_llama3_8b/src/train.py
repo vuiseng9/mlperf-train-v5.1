@@ -204,20 +204,20 @@ def get_data_module(
 
     tokenizer = AutoTokenizer(pretrained_model_name=tokenizer_path)
 
-    dataset_path = "/data/"
+    # dataset_path = "/data/"
 
     if use_full_dataset:
-        train_datasets = sum([["12.5", f"{dataset_path}/c4-train.en_{idx}_text_document"] for idx in range(8)], [])
+        train_datasets = sum([["12.5", f"{tokenizer_path}/../c4-train.en_{idx}_text_document"] for idx in range(8)], [])
     else:
-        train_datasets = sum([["10", f"{dataset_path}/c4-train.en_{idx}_text_document"] for idx in [6]], [])
+        train_datasets = sum([["10", f"{tokenizer_path}/../c4-train.en_{idx}_text_document"] for idx in [6]], [])
 
     data_paths = {
         "train": train_datasets,
         "validation": [
-            f"{dataset_path}/c4-validation-91205-samples.en_text_document"
+            f"{tokenizer_path}/../c4-validation-91205-samples.en_text_document"
         ],
         "test": [
-            f"{dataset_path}/c4-validation-91205-samples.en_text_document"
+            f"{tokenizer_path}/../c4-validation-91205-samples.en_text_document"
         ],
     }
 

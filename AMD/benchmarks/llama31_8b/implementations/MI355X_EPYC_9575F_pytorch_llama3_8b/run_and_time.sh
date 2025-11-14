@@ -1,7 +1,12 @@
 #!/bin/bash
 
-set -e
+set +e
 # Run
+
+TOKENIZER_PATH="${TOKENIZER_PATH:-./aux/Llama-3.1-8B}"
+SEED="${SEED:-1112}"
+NEXP="${NEXP:-1}"
+LOGDIR="${LOGDIR:-./results}"
 
 CMD_SUFFIX=""
 
@@ -37,15 +42,17 @@ start=$(date +%s)
 start_fmt=$(date +%Y-%m-%d\ %r)
 echo "STARTING TIMING RUN AT $start_fmt"
 
-DATA_CMD="torchrun --nnodes=1 --nproc_per_node=1"
-$DATA_CMD src/prepare_data.py \
---gbs $GBS --mbs $MBS \
---seed $SEED \
---eval_every $EVAL_EVERY \
---start_eval_at $START_EVAL_AT
-ret_code=$?
+# we have our own tiny data processing
+# DATA_CMD="torchrun --nnodes=1 --nproc_per_node=1"
+# $DATA_CMD src/prepare_data.py \
+# --gbs $GBS --mbs $MBS \
+# --seed $SEED \
+# --eval_every $EVAL_EVERY \
+# --start_eval_at $START_EVAL_AT
+# ret_code=$?
 
-if [[ $ret_code != 0 ]]; then exit $ret_code; fi
+# if [[ $ret_code != 0 ]]; then exit $ret_code; fi
+export TRAINING_LOSS_LOG_FREQ=1
 
 TRAIN_CMD="torchrun --nnodes=$NNODES --nproc_per_node=$GPUS_PER_NODE"
 $TRAIN_CMD src/train.py \
@@ -54,16 +61,17 @@ $TRAIN_CMD src/train.py \
 --gbs $GBS --mbs $MBS \
 --max_lr $MAX_LR \
 --seed $SEED \
---continual_ckpt_path $CONTINUAL_CKPT \
 --target_log_ppl $TARGET \
 --step_time_atol $STEP_TIME_ATOL \
 --ckpt_start_step $START_STEPS \
 --warmup_steps $WARMUP_STEPS \
 --eval_every $EVAL_EVERY \
 --start_eval_at $START_EVAL_AT \
+--tokenizer_path $TOKENIZER_PATH \
 $CMD_SUFFIX ; ret_code=$?
 
-if [[ $ret_code != 0 ]]; then exit $ret_code; fi
+# --continual_ckpt_path $CONTINUAL_CKPT \
+# if [[ $ret_code != 0 ]]; then exit $ret_code; fi
 
 # end timing
 end=$(date +%s)
@@ -74,4 +82,4 @@ result=$(( $end - $start ))
 result_name="LLM_FINETUNING"
 echo "RESULT,$result_name,,$result,AMD,$start_fmt"
 
-exit 0
+# exit 0

@@ -1,5 +1,5 @@
 _target_: custom_data_module.CustomDiffusionDataModule
-path: ${oc.env:DATA_PATH, /dataset/energon}
+path: ${oc.env:DATA_PATH, /root/work/dataset/energon/}
 seq_length: 256
 task_encoder:
   _target_: task_encoder.FluxTaskEncoder

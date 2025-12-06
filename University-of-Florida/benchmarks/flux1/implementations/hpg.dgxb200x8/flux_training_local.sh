@@ -1,0 +1,1 @@
+../b200_nemo/flux_training_local.sh

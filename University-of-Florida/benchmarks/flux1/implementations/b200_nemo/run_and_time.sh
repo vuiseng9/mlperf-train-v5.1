@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# set -x
+
 export HF_DATASETS_OFFLINE=1
 export TRANSFORMERS_OFFLINE=1
 export DIFFUSERS_OFFLINE=1
@@ -53,5 +55,7 @@ if [[ "${node_rank}" -eq 0 && "${local_rank}" -eq 0 ]]; then
 fi
 
 
+echo "Executing: ${LOGGER:-} ${CMD[@]} train.py model=${MODEL} data=${DATA} ${EXTRA_ARGS}"
 ${LOGGER:-} ${CMD[@]} train.py model=${MODEL} data=${DATA} ${EXTRA_ARGS}
+
 

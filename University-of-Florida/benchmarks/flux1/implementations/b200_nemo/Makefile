@@ -23,11 +23,14 @@ dl-coco-2014-val: make-dirs
 # 	python /workspace/flux/scripts/to_webdataset.py --input_path $(DATASET_ROOT)/cc12m_preprocessed --output_path $(DATASET_ROOT)/energon/train --num_workers 8
 
 energon-tiny-train-wds:
-	python /workspace/flux/scripts/to_webdataset.py --input_path $(DATASET_ROOT)/cc12m_tiny_preprocessed --output_path $(DATASET_ROOT)/energon/train --num_workers 8
+	python /workspace/flux/scripts/to_webdataset.py --input_path $(DATASET_ROOT)/cc12m_tiny_preprocessed --output_path $(DATASET_ROOT)/energon/train --num_workers 8 \
+	&& rm -rf $(DATASET_ROOT)/cc12m_tiny_preprocessed/
 
 energon-val-wds: make-dirs
 	python /workspace/flux/scripts/to_webdataset.py --input_path $(DATASET_ROOT)/coco_preprocessed --output_path $(DATASET_ROOT)/energon/val --num_workers 8
+	&& rm -rf $(DATASET_ROOT)/coco_preprocessed/
 
+# this step will prompt multiple times, select Y, Y, 11
 energon-prepare:
 	cd $(DATASET_ROOT)/energon && energon prepare --split-parts 'train:train/.*' --split-parts 'val:val/.*' ./
 
